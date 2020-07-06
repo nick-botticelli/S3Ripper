@@ -1,4 +1,6 @@
 # S3Ripper
+![Java CI with Gradle](https://github.com/nick-botticelli/S3Ripper/workflows/Java%20CI%20with%20Gradle/badge.svg)
+
 A tool to rip links from an S3 bucket root XML file
 
 ## Building
