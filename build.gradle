@@ -11,6 +11,12 @@ repositories {
     mavenCentral()
 }
 
+// Reproducible builds
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'website.nickb.s3ripper.S3Ripper'
