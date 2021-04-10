@@ -21,16 +21,15 @@ import java.util.Scanner;
 public class S3Ripper
 {
     public static final String ROOT_FILE = "s3root.xml";
-    public static final String OUTPUT_FLE = "s3ripper_urls.txt";
+    public static final String OUTPUT_FILE = "s3ripper_urls.txt";
 
-    private static Scanner scanner;
     private static List<String> urls;
 
     public static void main(String[] args)
     {
         // Init
         System.out.println("=== S3Ripper ===\n\n");
-        scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         urls = new LinkedList<>();
 
         // URL input
@@ -39,10 +38,10 @@ public class S3Ripper
 
         // Main logic
         downloadRootXML(url);
-        parseXML(url);
+        parseXML();
         ripUrls(url);
 
-        System.out.println("S3Ripper has finished without error.");
+        System.out.println("S3Ripper has finished.");
     }
 
     private static void downloadRootXML(String url)
@@ -51,23 +50,23 @@ public class S3Ripper
 
         try
         {
-            new File(ROOT_FILE).delete();
+            if (new File(ROOT_FILE).delete())
+                System.out.println("Overwriting old \"" + ROOT_FILE + "\".");
 
             URL website = new URL(url);
             ReadableByteChannel rbc = Channels.newChannel(website.openStream());
             FileOutputStream fos = new FileOutputStream(ROOT_FILE);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
-        catch (Exception e)
+        catch (Exception exc)
         {
-            System.out.println("Exception!");
-            e.printStackTrace();
+            exc.printStackTrace();
         }
 
         System.out.println("Done!");
     }
 
-    private static void parseXML(String url)
+    private static void parseXML()
     {
         System.out.println("Parsing XML and collecting URL's...");
 
@@ -79,7 +78,6 @@ public class S3Ripper
             Document doc = dBuilder.parse(fXmlFile);
             doc.getDocumentElement().normalize();
 
-            String rootElement = doc.getDocumentElement().getNodeName();
             NodeList nList = doc.getElementsByTagName("Contents");
 
             for (int temp = 0; temp < nList.getLength(); temp++)
@@ -95,9 +93,9 @@ public class S3Ripper
                 }
             }
         }
-        catch (Exception e)
+        catch (Exception exc)
         {
-            e.printStackTrace();
+            exc.printStackTrace();
         }
 
         System.out.println("Done!");
@@ -106,23 +104,16 @@ public class S3Ripper
     private static void ripUrls(String url)
     {
         // For now, save the full URL's line-by-line in a text file
-
-        File outFile = new File(OUTPUT_FLE);
-        FileWriter writer = null;
         System.out.println("Writing URL's to file...");
 
-        try
+        try (FileWriter writer = new FileWriter(OUTPUT_FILE))
         {
-            writer = new FileWriter("");
-
             for (String urlSuffix : urls)
-                writer.write((url + urlSuffix).replace("\\\\", "\\") + System.lineSeparator());
-
-            writer.close();
+                writer.write((url + '/' + urlSuffix) + System.lineSeparator());
         }
-        catch (IOException e)
+        catch (IOException exc)
         {
-            e.printStackTrace();
+            exc.printStackTrace();
         }
 
         System.out.println("Done!");
